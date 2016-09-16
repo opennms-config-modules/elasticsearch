@@ -1,0 +1,88 @@
+= Elasticseaerch data performance data collection
+
+This repository contains the configuration to use link:http://www.opennms.org[OpenNMS] collecting performance metrics provided through the link:https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-stats.html[Elasticsearch Cluster Stats API].
+With the provided configuration the metrics will be collected every 5 minutes and persisted in OpenNMS using the configured storage strategy like link:http://oss.oetiker.ch/rrdtool/[RRDtool] or link:http://cassandra.apache.org[Cassandra] based link:http://opennms.github.io/newts/[Newts].
+
+== Requirements
+
+* Elasticsearch release with Cluster Stats API support
+* OpenNMS Horizon/Meridian
+* Installed  with XML data collector plugin
+* Provision your Elasticssearch nodes into OpenNMS for monitoring
+* The config example has OpenNMS installed in `/opt/opennms`, on Debian/Ubuntu change the path accordingly to `/usr/share/opennms`
+
+The XML data collector plugin is not installed by default and can be installed with
+
+.Installing XML collector plugin
+[source, bash]
+----
+yum install opennms-plugin-protocol-xml
+apt-get install opennms-plugin-protocol-xml
+----
+
+After installing the plugin it is required to restart OpenNMS with
+
+[source, bash]
+----
+systemctl restart opennms
+----
+
+== Install data collection configuration
+
+Checkout this repository with git or copy the files manually using the GitHub raw link to download the configuration files.
+
+.Install configuration for metrics collection and RRD graph definitions
+[source, bash]
+----
+git clone https://github.com/opennms-config-modules/elasticsearch.git
+cd elasticsearch
+cp snmp-graph.properties.d/elasticsearch-node-graph.properties /opt/opennms/etc/snmp-graph.properties.d
+cp xml-datacollection/elasticsearch-stats.xml /opt/opennms/etc/xml-datacollection
+----
+
+== Configure Collectd
+
+Add the following lines `collectd-configuration.xml` in the `in the default installed ``example1` package.
+The `collector service` needs to be added on the very end of the file, it tells OpenNMS to the XML collector for this type of service.
+Enable the _JSON_ Handler to allow parsing the output accordingly.
+
+.Create a new collection service for the Elasticsearch Cluster metrics
+[source, xml]
+----
+<service name="Elasticsearch-Stats" interval="300000" user-defined="false" status="on">
+    <parameter key="collection" value="elasticsearch-stats" />
+    <parameter key="handler-class" value="org.opennms.protocols.json.collector.DefaultJsonCollectionHandler"/>
+</service>
+
+<collector service="Elasticsearch-Stats" class-name="org.opennms.protocols.xml.collector.XmlCollector"/>
+----
+
+Create the `xml-datacollection-config.xml` which defines RRD configuration.
+
+[source, xml]
+----
+<xml-datacollection-config rrdRepository="/opt/opennms/share/rrd/snmp/" <1>
+                           xmlns="http://xmlns.opennms.org/xsd/config/xml-datacollection">
+    <xml-collection name="elasticsearch-stats">
+        <rrd step="300">
+            <rra>RRA:AVERAGE:0.5:1:2016</rra>
+            <rra>RRA:AVERAGE:0.5:12:1488</rra>
+            <rra>RRA:AVERAGE:0.5:288:366</rra>
+            <rra>RRA:MAX:0.5:288:366</rra>
+            <rra>RRA:MIN:0.5:288:366</rra>
+        </rrd>
+        <xml-source url="http://elasticip:9200/_cluster/stats">
+            <import-groups>xml-datacollection/elasticsearch-stats.xml</import-groups>
+        </xml-source>
+    </xml-collection>
+</xml-datacollection-config>
+----
+<1> OpenNMS home relative path to persist RRD files
+<2> URL to Elasticsearch Cluster statistics ReST service
+<3> Instead of `YOUR-SERVER` you can also use `{ipaddr}` which is replaced with the IP interface address of the assigned `Elasticsearch-Stats` service
+<4> Include pre-configured metrics configuration for data collection
+
+Restart OpenNMS and provision a service on your nodes IP interface named `Elasticsearch-Stats`.
+
+== Author
+ronny@opennms.org
