@@ -86,18 +86,6 @@
         <xml-object name="osMemTotalBytes" type="GAUGE" xpath="total_in_bytes"/>
     </xml-group>
 
-    <xml-group name="cluster-nodes-os-cpu" resource-type="node" resource-xpath="/nodes/os/cpu">
-        <xml-object name="cpuVendor" type="STRING" xpath="vendor"/>
-        <xml-object name="cpuModel" type="STRING" xpath="model"/>
-        <xml-object name="cpuMhz" type="STRING" xpath="mhz"/>
-        <xml-object name="cpuCacheSize" type="STRING" xpath="cache_size"/>
-        <xml-object name="cpuTotalCores" type="GAUGE" xpath="total_cores"/>
-        <xml-object name="cpuTotalSockets" type="GAUGE" xpath="total_sockets"/>
-        <xml-object name="cpuCoresPerSocket" type="GAUGE" xpath="cores_per_socket"/>
-        <xml-object name="cpuCacheSizeBytes" type="STRING" xpath="cache_size_in_bytes"/>
-        <xml-object name="cpuCount" type="GAUGE" xpath="count"/>
-    </xml-group>
-
     <xml-group name="cluster-nodes-process-cpu" resource-type="node" resource-xpath="/nodes/process/cpu">
         <xml-object name="procCpuPercent" type="GAUGE" xpath="percent"/>
     </xml-group>
@@ -110,14 +98,6 @@
 
     <xml-group name="cluster-nodes-jvm" resource-type="node" resource-xpath="/nodes/jvm">
         <xml-object name="jvmMaxUptimeMillis" type="GAUGE" xpath="max_uptime_in_millis"/>
-    </xml-group>
-
-    <xml-group name="cluster-nodes-jvm-versions" resource-type="node" resource-xpath="/nodes/jvm/versions">
-        <xml-object name="jvmVersion" type="STRING" xpath="version"/>
-        <xml-object name="jvmVmName" type="STRING" xpath="vm_name"/>
-        <xml-object name="jvmVmVersion" type="STRING" xpath="vm_version"/>
-        <xml-object name="jvmVmVendor" type="STRING" xpath="vm_vendor"/>
-        <xml-object name="jvmCount" type="GAUGE" xpath="count"/>
     </xml-group>
 
     <xml-group name="cluster-nodes-jvm-mem" resource-type="node" resource-xpath="/nodes/jvm/mem">
