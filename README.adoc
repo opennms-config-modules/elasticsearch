@@ -1,4 +1,4 @@
-= Elasticseaerch data performance data collection
+= Elasticsearch data performance data collection
 
 This repository contains the configuration to use link:http://www.opennms.org[OpenNMS] collecting performance metrics provided through the link:https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-stats.html[Elasticsearch Cluster Stats API].
 With the provided configuration the metrics will be collected every 5 minutes and persisted in OpenNMS using the configured storage strategy like link:http://oss.oetiker.ch/rrdtool/[RRDtool] or link:http://cassandra.apache.org[Cassandra] based link:http://opennms.github.io/newts/[Newts].
@@ -8,7 +8,7 @@ With the provided configuration the metrics will be collected every 5 minutes an
 * Elasticsearch release with Cluster Stats API support
 * OpenNMS Horizon/Meridian
 * Installed  with XML data collector plugin
-* Provision your Elasticssearch nodes into OpenNMS for monitoring
+* Provision your Elasticsearch nodes into OpenNMS for monitoring
 * The config example has OpenNMS installed in `/opt/opennms`, on Debian/Ubuntu change the path accordingly to `/usr/share/opennms`
 
 The XML data collector plugin is not installed by default and can be installed with
@@ -37,7 +37,7 @@ Checkout this repository with git or copy the files manually using the GitHub ra
 git clone https://github.com/opennms-config-modules/elasticsearch.git
 cd elasticsearch
 cp snmp-graph.properties.d/elasticsearch-node-graph.properties /opt/opennms/etc/snmp-graph.properties.d
-cp xml-datacollection/elasticsearch-stats.xml /opt/opennms/etc/xml-datacollection
+cp xml-datacollection/elasticsearch-cluster-status.xml /opt/opennms/etc/xml-datacollection
 ----
 
 == Configure Collectd
@@ -49,12 +49,12 @@ Enable the _JSON_ Handler to allow parsing the output accordingly.
 .Create a new collection service for the Elasticsearch Cluster metrics
 [source, xml]
 ----
-<service name="Elasticsearch-Stats" interval="300000" user-defined="false" status="on">
-    <parameter key="collection" value="elasticsearch-stats" />
+<service name="Elasticsearch" interval="300000" user-defined="false" status="on">
+    <parameter key="collection" value="elasticsearch-cluster-status" />
     <parameter key="handler-class" value="org.opennms.protocols.json.collector.DefaultJsonCollectionHandler"/>
 </service>
 
-<collector service="Elasticsearch-Stats" class-name="org.opennms.protocols.xml.collector.XmlCollector"/>
+<collector service="Elasticsearch" class-name="org.opennms.protocols.xml.collector.XmlCollector"/>
 ----
 
 Create the `xml-datacollection-config.xml` which defines RRD configuration.
@@ -63,7 +63,7 @@ Create the `xml-datacollection-config.xml` which defines RRD configuration.
 ----
 <xml-datacollection-config rrdRepository="/opt/opennms/share/rrd/snmp/" <1>
                            xmlns="http://xmlns.opennms.org/xsd/config/xml-datacollection">
-    <xml-collection name="elasticsearch-stats">
+    <xml-collection name="elasticsearch-cluster-status">
         <rrd step="300">
             <rra>RRA:AVERAGE:0.5:1:2016</rra>
             <rra>RRA:AVERAGE:0.5:12:1488</rra>
@@ -72,17 +72,36 @@ Create the `xml-datacollection-config.xml` which defines RRD configuration.
             <rra>RRA:MIN:0.5:288:366</rra>
         </rrd>
         <xml-source url="http://elasticip:9200/_cluster/stats">
-            <import-groups>xml-datacollection/elasticsearch-stats.xml</import-groups>
+            <import-groups>xml-datacollection/elasticsearch-cluster-status.xml</import-groups>
         </xml-source>
     </xml-collection>
 </xml-datacollection-config>
 ----
 <1> OpenNMS home relative path to persist RRD files
 <2> URL to Elasticsearch Cluster statistics ReST service
-<3> Instead of `YOUR-SERVER` you can also use `{ipaddr}` which is replaced with the IP interface address of the assigned `Elasticsearch-Stats` service
+<3> Instead of `YOUR-SERVER` you can also use `{ipaddr}` which is replaced with the IP interface address of the assigned `Elasticsearch` service
 <4> Include pre-configured metrics configuration for data collection
 
-Restart OpenNMS and provision a service on your nodes IP interface named `Elasticsearch-Stats`.
+== Test Elasticsearch Cluster Status
+
+The _Elasticsearch_ service can be also used to measure availability and response time using _Pollerd_.
+For this case the _HTTP Monitor_ can be used with the following configuration:
+
+[source,xml]
+----
+<service name="Elasticsearch" interval="300000" user-defined="true" status="on">
+  <parameter key="retry" value="1"/>
+  <parameter key="timeout" value="3000"/>
+  <parameter key="port" value="9200"/>
+  <parameter key="url" value="/_cluster/stats"/>
+  <parameter key="response" value="200-202,299"/>
+  <parameter key="response-text" value="~.*status.:.green.*"/>
+</service>
+
+<monitor service="Elasticsearch" class-name="org.opennms.netmgt.poller.monitors.HttpMonitor" />
+----
+
+Restart OpenNMS and provision a service on your nodes IP interface named `Elasticsearch`.
 
 == Author
 ronny@opennms.org
