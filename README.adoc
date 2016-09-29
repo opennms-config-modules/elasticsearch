@@ -84,7 +84,7 @@ Create the `xml-datacollection-config.xml` which defines RRD configuration.
 
 == Test Elasticsearch Cluster Status
 
-The _Elasticsearch_ service can be also used to measure availability and response time using _Pollerd_.
+The _Elasticsearch_ service can be used to test if the cluster status is green and ok with _Pollerd_.
 For this case the _HTTP Monitor_ can be used with the following configuration:
 
 [source,xml]
