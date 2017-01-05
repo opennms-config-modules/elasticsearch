@@ -36,7 +36,7 @@ Checkout this repository with git or copy the files manually using the GitHub ra
 ----
 git clone https://github.com/opennms-config-modules/elasticsearch.git
 cd elasticsearch
-cp snmp-graph.properties.d/elasticsearch-node-graph.properties /opt/opennms/etc/snmp-graph.properties.d
+cp snmp-graph.properties.d/elasticsearch-cluster-graph.properties /opt/opennms/etc/snmp-graph.properties.d
 cp xml-datacollection/elasticsearch-cluster-status.xml /opt/opennms/etc/xml-datacollection
 ----
 
