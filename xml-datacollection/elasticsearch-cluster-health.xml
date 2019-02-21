@@ -1,0 +1,16 @@
+<xml-groups>
+    <xml-group name="cluster-health" resource-type="node" resource-xpath="/">
+        <xml-object name="numOfNodes" type="GAUGE" xpath="number_of_nodes"/>
+        <xml-object name="numOfDataNodes" type="GAUGE" xpath="number_of_data_nodes"/>
+        <xml-object name="actPrimShards" type="GAUGE" xpath="active_primary_shards"/>
+        <xml-object name="actShards" type="GAUGE" xpath="active_shards"/>
+        <xml-object name="relocShards" type="GAUGE" xpath="relocating_shards"/>
+        <xml-object name="initShards" type="GAUGE" xpath="initializing_shards"/>
+        <xml-object name="unasShards" type="GAUGE" xpath="unassigned_shards"/>
+        <xml-object name="delayedUnasShards" type="GAUGE" xpath="delayed_unassigned_shards"/>
+        <xml-object name="numPendTask" type="GAUGE" xpath="number_of_pending_tasks"/>
+        <xml-object name="numFlightFetch" type="GAUGE" xpath="number_of_in_flight_fetch"/>
+        <xml-object name="taskMaxWait" type="GAUGE" xpath="task_max_waiting_in_queue_millis"/>
+        <xml-object name="actShardsPerc" type="GAUGE" xpath="active_shards_percent_as_number"/>
+    </xml-group>
+</xml-groups>
