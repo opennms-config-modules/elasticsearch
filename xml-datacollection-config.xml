@@ -10,5 +10,8 @@
         <xml-source url="http://elastic:9200/_cluster/stats">
             <import-groups>xml-datacollection/elasticsearch-cluster-stats.xml</import-groups>
         </xml-source>
+        <xml-source url="http://{ipaddr}:9200/_cluster/health">
+            <import-groups>xml-datacollection/elasticsearch-cluster-health.xml</import-groups>
+        </xml-source>
     </xml-collection>
 </xml-datacollection-config>
