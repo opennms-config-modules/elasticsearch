@@ -1,0 +1,8 @@
+   <package name="Elasticsearch">
+      <filter>isElasticsearch</filter>
+      <include-range begin="1.1.1.1" end="254.254.254.254"/>
+      <include-range begin="::1" end="ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"/>
+      <service name="Elasticsearch" interval="300000" user-defined="false" status="on">
+         <parameter key="thresholding-group" value="Elasticsearch"/>
+      </service>
+   </package>

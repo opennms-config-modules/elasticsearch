@@ -7,13 +7,13 @@ With the provided configuration the metrics will be collected every 5 minutes an
 
 * Elasticsearch release with Cluster Stats API support
 * OpenNMS Horizon/Meridian
-* Installed  with XML data collector plugin
+* Installed  with XML data collector plugin (included in > v20)
 * Provision your Elasticsearch nodes into OpenNMS for monitoring
 * The config example has OpenNMS installed in `/opt/opennms`, on Debian/Ubuntu change the path accordingly to `/usr/share/opennms`
 
 The XML data collector plugin is not installed by default and can be installed with
 
-.Installing XML collector plugin
+.Installing XML collector plugin < v20
 [source, bash]
 ----
 yum install opennms-plugin-protocol-xml
@@ -27,6 +27,7 @@ After installing the plugin it is required to restart OpenNMS with
 systemctl restart opennms
 ----
 
+
 == Install data collection configuration
 
 Checkout this repository with git or copy the files manually using the GitHub raw link to download the configuration files.
@@ -38,6 +39,8 @@ git clone https://github.com/opennms-config-modules/elasticsearch.git
 cd elasticsearch
 cp snmp-graph.properties.d/elasticsearch-cluster-graph.properties /opt/opennms/etc/snmp-graph.properties.d
 cp xml-datacollection/elasticsearch-cluster-stats.xml /opt/opennms/etc/xml-datacollection
+cp xml-datacollection/elasticsearch-cluster-health.xml /opt/opennms/etc/xml-datacollection
+
 ----
 
 == Configure Collectd
@@ -57,13 +60,11 @@ Enable the _JSON_ Handler to allow parsing the output accordingly.
 <collector service="Elasticsearch" class-name="org.opennms.protocols.xml.collector.XmlCollector"/>
 ----
 
-Create the `xml-datacollection-config.xml` which defines RRD configuration.
+Edit the `xml-datacollection-config.xml` which defines RRD configuration and add the Elasticsearch collection.
 
 [source, xml]
 ----
-<xml-datacollection-config rrdRepository="/opt/opennms/share/rrd/snmp/" <1>
-                           xmlns="http://xmlns.opennms.org/xsd/config/xml-datacollection">
-    <xml-collection name="elasticsearch-cluster-status">
+    <xml-collection name="elasticsearch-cluster-stats">
         <rrd step="300">
             <rra>RRA:AVERAGE:0.5:1:2016</rra>
             <rra>RRA:AVERAGE:0.5:12:1488</rra>
@@ -71,16 +72,15 @@ Create the `xml-datacollection-config.xml` which defines RRD configuration.
             <rra>RRA:MAX:0.5:288:366</rra>
             <rra>RRA:MIN:0.5:288:366</rra>
         </rrd>
-        <xml-source url="http://elasticip:9200/_cluster/stats">
-            <import-groups>xml-datacollection/elasticsearch-cluster-status.xml</import-groups>
+        <xml-source url="http://{ipaddr}:9200/_cluster/stats">
+            <import-groups>xml-datacollection/elasticsearch-cluster-stats.xml</import-groups>
+        </xml-source>
+        <xml-source url="http://{ipaddr}:9200/_cluster/health">
+            <import-groups>xml-datacollection/elasticsearch-cluster-health.xml</import-groups>
         </xml-source>
     </xml-collection>
-</xml-datacollection-config>
 ----
-<1> OpenNMS home relative path to persist RRD files
-<2> URL to Elasticsearch Cluster statistics ReST service
-<3> Instead of `YOUR-SERVER` you can also use `{ipaddr}` which is replaced with the IP interface address of the assigned `Elasticsearch` service
-<4> Include pre-configured metrics configuration for data collection
+
 
 == Test Elasticsearch Cluster Status
 
@@ -103,5 +103,29 @@ For this case the _HTTP Monitor_ can be used with the following configuration:
 
 Restart OpenNMS and provision a service on your nodes IP interface named `Elasticsearch`.
 
+== Add threshold alarms
+
+Some default alarm configuration can be added if needed.
+
+Threshd config package in `thresholds/threshd-configuration.xml` contains a package which will assign the thresholds to all nodes with an `Elasticsearch` service on an interface.
+In `thresholds/thresholds.xml` are the threshold definitions.
+
+Those configurations can be copied into a running OpenNMS instances config.
+
+=== Add threshold events
+
+Event file is required for the thresholds above so alarm raising and automatical resolving is possible.
+
+----
+cp ${HOME}/opennms-config-workspace/elasticsearch/events/*.xml ${OPENNMS_HOME}/etc/events
+----
+
+.Include in eventconf.xml
+[source, xml]
+----
+<event-file>events/es-threshold.events.xml</event-file>
+----
+
+
 == Author
-ronny@opennms.org
+ronny@opennms.org / mfuhrmann@opennms.org
