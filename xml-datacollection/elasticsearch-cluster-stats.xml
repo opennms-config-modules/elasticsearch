@@ -26,8 +26,8 @@
     </xml-group>
 
     <xml-group name="cluster-indices-docs" resource-type="node" resource-xpath="/indices/docs">
-        <xml-object name="docsCount" type="GAUGE" xpath="count"/>
-        <xml-object name="docsDeleted" type="GAUGE" xpath="deleted"/>
+        <xml-object name="docsCount" type="COUNTER" xpath="count"/>
+        <xml-object name="docsDeleted" type="COUNTER" xpath="deleted"/>
     </xml-group>
 
     <xml-group name="cluster-indices-store" resource-type="node" resource-xpath="/indices/store">
