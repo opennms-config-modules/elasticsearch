@@ -14,7 +14,7 @@
         &lt;/table></descr>
       <logmsg dest="logndisplay">Elasticsearch warning: %parm[description]%</logmsg>
       <severity>Warning</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[ds]%:%parm[threshold]%:%parm[trigger]%:%parm[rearm]%:%parm[label]%" alarm-type="1" auto-clean="false"/>
+      <alarm-data reduction-key="%uei%:%parm[ds]%:%parm[threshold]%:%parm[trigger]%:%parm[rearm]%:%parm[label]%" alarm-type="1" auto-clean="false"/>
    </event>
    <event>
       <uei>uei.opennms.org/threshold/elasticsearch/warning/rearmed</uei>
@@ -30,6 +30,6 @@
         &lt;/table></descr>
       <logmsg dest="logndisplay">RESOLVED: Elasticsearch warning: %parm[description]%.</logmsg>
       <severity>Normal</severity>
-      <alarm-data reduction-key="%uei%:%nodeid%:%parm[ds]%:%parm[threshold]%:%parm[trigger]%:%parm[rearm]%:%parm[label]%" alarm-type="2" clear-key="uei.opennms.org/threshold/elasticsearch/warning/exceeded:%nodeid%:%parm[ds]%:%parm[threshold]%:%parm[trigger]%:%parm[rearm]%:%parm[label]%" auto-clean="false"/>
+      <alarm-data reduction-key="%uei%:%parm[ds]%:%parm[threshold]%:%parm[trigger]%:%parm[rearm]%:%parm[label]%" alarm-type="2" clear-key="uei.opennms.org/threshold/elasticsearch/warning/exceeded:%parm[ds]%:%parm[threshold]%:%parm[trigger]%:%parm[rearm]%:%parm[label]%" auto-clean="false"/>
    </event>
 </events>
